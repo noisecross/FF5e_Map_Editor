@@ -1,0 +1,54 @@
+|------------------------------------------|
+| FF5e_Map_editor                          |
+| File: changelog.txt                      |
+| v0.86, September 2016                    |
+| Author: noisecross                       |
+|------------------------------------------|
+
+
+
+------------------------------------------
+Released version 0.86
+------------------------------------------
+Added a map Encounters viewer.
+Added viewer of enemy formations and enemy groups.
+Some minor fixes in code and improvements in comments.
+
+------------------------------------------
+Released version 0.85
+------------------------------------------
+Allow multiselection of tiles
+DEPRECATED Scrolling using mouse
+Added feature which reorder tilempaps and tilemap offsets.
+  (to take advantage of the 63 remaining bytes at the end
+  of the tilemaps table)
+
+------------------------------------------
+Released version 0.84
+------------------------------------------
+Allow edition of Map Descriptors.
+New Events viewer based on LightPhoenix docs.
+Allow edition of map Treasures, Exits, NPCs and Events.
+
+------------------------------------------
+Released version 0.83
+------------------------------------------
+The dump of Events is accurate now.
+The NPCs are displayed as sprites.
+
+------------------------------------------
+Released version 0.82 (beta)
+------------------------------------------
+Events are displayed.
+Location names are displayed.
+Minor fixes.
+
+------------------------------------------
+Released version 0.81 (beta)
+------------------------------------------
+World maps can be edited and injected back into the ROM.
+Fixed the exception errors on maps without tilemaps.
+Improved (but not fixed) transparencies.
+Scrolling using mouse.
+Improved zoom (0.5x to 4.0x)
+Export PNG.
