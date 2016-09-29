@@ -2,12 +2,12 @@
 * |------------------------------------------|
 * | FF5e_Map_editor                          |
 * | File: Main_Map_Editor.cs                 |
-* | v0.86, September 2016                    |
+* | v0.87, September 2016                    |
 * | Author: noisecross                       |
 * |------------------------------------------|
 * 
 * @author noisecross
-* @version 0.86
+* @version 0.87
 * 
 */
 
@@ -30,19 +30,13 @@ namespace FF5e_Map_Editor
 {
     public partial class Main_Map_Editor : Form
     {
-        /* Global variables */
+        // Global variables
         const string windowName      = "FF5e_Map_Editor";
-        const string version         = "Ver. v0.86 (September 2016)";
+        const string version         = "Ver. v0.87 (September 2016)";
         int          headerOffset    = 0;
         MAP_Manager  mapManager;
 
-        int              choosenTileX    = 0;
-        int              choosenTileY    = 0;
-        int              choosenTileXEnd = 0;
-        int              choosenTileYEnd = 0;
-        List<List<Byte>> choosenTileId00 = new List<List<Byte>>();
-        List<List<Byte>> choosenTileId01 = new List<List<Byte>>();
-        double           mapZoom         = 1;
+        double       mapZoom         = 1;
 
         bool         mapIsDrawable   = false;
         bool         nUNDUpdatable   = true;
@@ -62,6 +56,9 @@ namespace FF5e_Map_Editor
 
         TBL_Manager  tblManager      = new TBL_Manager();
 
+        //Tileset Form
+        DisplayTileset tilesetForm = new DisplayTileset();
+
         //Tileset tab
         List<tile16x16> tileSetMap = new List<tile16x16>();
         Bitmap tileSetBitmap = new Bitmap(0x0100, 0x0100);
@@ -69,14 +66,10 @@ namespace FF5e_Map_Editor
         //Properties tab
         Bitmap npc = new Bitmap(1, 1);
 
-        /* SMC file to edit */
+        // SMC file to edit
         string fileUnderEdition  = "";
         string fileUnderEditionS = "";
         bool   fileToEditIsAvailable = false;
-
-        //int panelBoxMapBeginScrollx;
-        //int panelBoxMapBeginScrolly;
-        //bool movingPanelScroll = false;
 
 
 
@@ -89,6 +82,9 @@ namespace FF5e_Map_Editor
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
             labelLocationName.Text = "";
             UpdateStyles();
+
+            // DEPRECATED Tileset tab page
+            this.tabPage2.Dispose();
         }
 
 
@@ -279,10 +275,7 @@ namespace FF5e_Map_Editor
             mapIsDrawable = false;
             nUNDUpdatable = true;
 
-            choosenTileId00.Clear();
-            choosenTileId01.Clear();
-            choosenTileId00.Add(new List<Byte> { 0x00 });
-            choosenTileId01.Add(new List<Byte> { 0x00 });
+            tilesetForm.resetClipboard();
 
             /* Displays an OpenFileDialog so the user can select a res */
             OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -346,7 +339,11 @@ namespace FF5e_Map_Editor
             if (fileToEditIsAvailable)
             {
                 if (mapManager.tilemap00.Count > 0)
-                    numericUpDownSelectedTileBg00.Value = mapManager.tilemap00[choosenTileX + choosenTileY * 64];
+                {
+                    int chosenTileX, chosenTileY;
+                    tilesetForm.getClipboardInformation(out chosenTileX, out chosenTileY);
+                    numericUpDownSelectedTileBg00.Value = mapManager.tilemap00[chosenTileX + chosenTileY * 64];
+                }
                 updateTileset();
                 this.BringToFront();
             }
@@ -397,16 +394,16 @@ namespace FF5e_Map_Editor
                 g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
 
                 // Graphics: SNES Mode 1
-                // The modes are selected by bits 0-2 of register $2105
-                // The variation of Mode 1 is selected by bit 3 of $2105
+                // The modes are selected by bits 0-2 of register $2105.
+                // The variation of Mode 1 is selected by bit 3 of $2105.
                 // The variation of Mode 7 is selected by bit 6 of $2133.
                 if (checkBoxBg02.Checked) g.DrawImage(mapBg02U, 0, 0, mapHeight, mapWidth);
                 if (checkBoxBg01.Checked) g.DrawImage(mapBg01U, 0, 0, mapHeight, mapWidth);
                 if (checkBoxBg02.Checked)
                     if ((mapManager.currentTransparency & 0x03) >= 2)
                     {
-                        drawTransparent(mapBg02U, mapMixedDisplay); //drawTransparent(g, mapBg02U, 0.7f, 0.5f);
-                        drawTransparent(mapBg02D, mapMixedDisplay); //drawTransparent(g, mapBg02D, 0.7f, 0.5f);
+                        drawTransparent(mapBg02U, mapMixedDisplay);
+                        drawTransparent(mapBg02D, mapMixedDisplay);
                     }
                 if (checkBoxBg00.Checked) g.DrawImage(mapBg00U, 0, 0, mapHeight, mapWidth);
                 if (checkBoxBg01.Checked) g.DrawImage(mapBg01D, 0, 0, mapHeight, mapWidth);
@@ -414,15 +411,14 @@ namespace FF5e_Map_Editor
                 if (checkBoxBg02.Checked)
                     if ((mapManager.currentTransparency & 0x03) == 1)
                     {
-                        drawTransparent(mapBg02U, mapMixedDisplay); //drawTransparent(g, mapBg02U, 0.7f, 0.5f);
-                        drawTransparent(mapBg02D, mapMixedDisplay); //drawTransparent(g, mapBg02D, 0.7f, 0.5f);
+                        drawTransparent(mapBg02U, mapMixedDisplay);
+                        drawTransparent(mapBg02D, mapMixedDisplay);
                     }
                 if (checkBoxBg02.Checked) { if ((mapManager.currentTransparency & 0x03) == 00) g.DrawImage(mapBg02D, 0, 0, mapHeight, mapWidth); }
 
                 if (checkBoxBgNPCs.Checked) g.DrawImage(mapNPCs, 0, 0, mapHeight, mapWidth);
-                //if (checkBoxBgNPCs.Checked) drawTransparent(mapNPCs, mapMixedDisplay); //g.DrawImage(mapNPCs, 0, 0, mapHeight, mapWidth);
-                if (checkBoxBgMiscs.Checked) drawTransparent(mapMiscs, mapMixedDisplay); //g.DrawImage(mapNPCs, 0, 0, mapHeight, mapWidth);
-                if (checkBoxBgWalls.Checked) drawTransparent(mapBgWalls, mapMixedDisplay); //drawTransparent(g, mapBgWalls, 0.5f, 1.0f);   
+                if (checkBoxBgMiscs.Checked) drawTransparent(mapMiscs, mapMixedDisplay);
+                if (checkBoxBgWalls.Checked) drawTransparent(mapBgWalls, mapMixedDisplay);
             }
         }
 
@@ -453,8 +449,8 @@ namespace FF5e_Map_Editor
             mapManager.mapGetExits(br, headerOffset, ((int)numericUpDownMap.Value), ((int)numericUpDownQuadrant.Value), mapMiscs);
             mapManager.mapGetChests(br, headerOffset, ((int)numericUpDownMap.Value), mapMiscs);
             mapManager.mapGetEvents(br, headerOffset, ((int)numericUpDownMap.Value), ((int)numericUpDownQuadrant.Value), mapMiscs);
-            //String pollo = mapManager.getEveryChestInfo(br, headerOffset, itemNames, spellNames);
-            //MessageBox.Show(pollo);
+            //String everyChestInfo = mapManager.getEveryChestInfo(br, headerOffset, itemNames, spellNames);
+            //MessageBox.Show(everyChestInfo);
 
             br.Close();
             fs.Close();
@@ -505,6 +501,11 @@ namespace FF5e_Map_Editor
 
             labelEnemyFormation.Text = mapManager.encounters[Convert.ToInt16(numericUpDownEnemyFormations.Value)].Replace(", ", "\r\n");
             labelEnemyGroups.Text = mapManager.monsterGroups[Convert.ToInt16(numericUpDownEnemyGroups.Value)];
+
+            // Display Tileset Form
+            tilesetForm.updateTileset(mapManager.tiles16x16, mapManager.tileProperties, numericUpDownMap.Value < 5);
+            tilesetForm.refreshChosenTilesDisplay(checkBoxBg00.Checked, checkBoxBg01.Checked);
+            tilesetForm.Show();
 
             Cursor.Current = Cursors.Default;
         }
@@ -678,12 +679,7 @@ namespace FF5e_Map_Editor
             e.Graphics.DrawImage(mapMixedDisplay, 0, 0, mapHeight, mapWidth);
 
             Pen whitePen = new Pen(Color.White, 1);
-            e.Graphics.DrawRectangle(
-                whitePen,
-                Convert.ToInt32(choosenTileX * 16 * mapZoom) - 1,
-                Convert.ToInt32(choosenTileY * 16 * mapZoom) - 1,
-                Convert.ToInt32(((choosenTileXEnd - choosenTileX) + 1) * 16 * mapZoom),
-                Convert.ToInt32(((choosenTileYEnd - choosenTileY) + 1) * 16 * mapZoom));
+            e.Graphics.DrawRectangle(whitePen, tilesetForm.getClipboardRectangle(Convert.ToInt32(mapZoom)));
             whitePen.Dispose();
 
             panelMap.AutoScroll = true;
@@ -843,29 +839,13 @@ namespace FF5e_Map_Editor
             if (e.Button == MouseButtons.Right) return;
 
 
+            int chosenTileXEnd = Convert.ToInt32(Math.Truncate((e.X - 1) / (16 * mapZoom)));
+            int chosenTileYEnd = Convert.ToInt32(Math.Truncate((e.Y - 1) / (16 * mapZoom)));
+            int index = chosenTileXEnd + chosenTileYEnd * 64;
             bool isWorldMap = numericUpDownMap.Value < 5;
 
             //Equivalent to MouseUp
-            choosenTileXEnd = Convert.ToInt32(Math.Truncate((e.X - 1) / (16 * mapZoom)));
-            choosenTileYEnd = Convert.ToInt32(Math.Truncate((e.Y - 1) / (16 * mapZoom)));
-            if (choosenTileXEnd > 0x3F) choosenTileXEnd = 0x3F;
-            if (choosenTileYEnd > 0x3F) choosenTileYEnd = 0x3F;
-            int index = choosenTileXEnd + choosenTileYEnd * 64;
-
-            int tempVar;
-            if (choosenTileXEnd < choosenTileX)
-            {
-                tempVar = choosenTileX;
-                choosenTileX = choosenTileXEnd;
-                choosenTileXEnd = tempVar;
-            }
-            if (choosenTileYEnd < choosenTileY)
-            {
-                tempVar = choosenTileY;
-                choosenTileY = choosenTileYEnd;
-                choosenTileYEnd = tempVar;
-            }
-
+            tilesetForm.updateChosenTileArea_endArea(chosenTileXEnd, chosenTileYEnd);
 
             nUNDUpdatable = false;
             if (mapManager.tilemap00.Count > index)
@@ -878,8 +858,6 @@ namespace FF5e_Map_Editor
             //Left button
             if (e.Button == MouseButtons.Left)
             {
-                //choosenTileId00 = Convert.ToByte(numericUpDownSelectedTileBg00.Value);
-                //choosenTileId01 = Convert.ToByte(numericUpDownSelectedTileBg01.Value);
                 updateChoosenTiles();
                 panelCurrenTile.Refresh();
             }
@@ -894,34 +872,20 @@ namespace FF5e_Map_Editor
 
         private void panelBoxMap_MouseDown(object sender, MouseEventArgs e)
         {
-            //if (!movingPanelScroll)
-            //{
-            //    panelBoxMapBeginScrollx = e.X;
-            //    panelBoxMapBeginScrolly = e.Y;
-            //}
-            //movingPanelScroll = true;
-
             if (e.Button == MouseButtons.Left)
             {
-                choosenTileX = Convert.ToInt32(Math.Truncate((e.X - 1) / (16 * mapZoom)));
-                choosenTileY = Convert.ToInt32(Math.Truncate((e.Y - 1) / (16 * mapZoom)));
-                if (choosenTileX > 0x3F) choosenTileX = 0x3F;
-                if (choosenTileY > 0x3F) choosenTileY = 0x3F;
+                tilesetForm.updateChosenTileArea_beginArea(
+                    Convert.ToInt32(Math.Truncate((e.X - 1) / (16 * mapZoom))),
+                    Convert.ToInt32(Math.Truncate((e.Y - 1) / (16 * mapZoom)))
+                    );
             }
 
             if (e.Button == MouseButtons.Right)
             {
-                //Cursor.Current = Cursors.WaitCursor;
-                //nUNDUpdatable = false;
-                //numericUpDownSelectedTileBg01.Value = choosenTileId01[0][0];
-                //numericUpDownSelectedTileBg00.Value = choosenTileId00[0][0];
-                //nUNDUpdatable = true;
-
                 int x = Convert.ToInt32(Math.Truncate((e.X - 1) / (16 * mapZoom)));
                 int y = Convert.ToInt32(Math.Truncate((e.Y - 1) / (16 * mapZoom)));
 
                 pasteChoosenTiles(x, y);
-                //Cursor.Current = Cursors.Default;
             }
         }
 
@@ -929,25 +893,13 @@ namespace FF5e_Map_Editor
 
         private void updateChoosenTiles()
         {
-            choosenTileId00.Clear();
-            choosenTileId01.Clear();
-
-            for (int j = choosenTileY; j <= choosenTileYEnd; j++)
-            {
-                List<Byte> subListBg00 = new List<Byte>();
-                List<Byte> subListBg01 = new List<Byte>();
-
-                for (int i = choosenTileX; i <= choosenTileXEnd; i++)
-                {
-                    if (mapManager.tilemap00.Count > 0) subListBg00.Add(mapManager.tilemap00[i + j * 64]);
-                    if (mapManager.tilemap01.Count > 0) subListBg01.Add(mapManager.tilemap01[i + j * 64]);
-                }
-
-                if (mapManager.tilemap00.Count > 0) choosenTileId00.Add(subListBg00);
-                if (mapManager.tilemap01.Count > 0) choosenTileId01.Add(subListBg01);
-            }
+            tilesetForm.updateChosenTiles(
+                mapManager.tilemap00,
+                mapManager.tilemap01,
+                checkBoxBg00.Checked,
+                checkBoxBg01.Checked);
         }
-
+       
 
 
         private void pasteChoosenTiles(int x, int y)
@@ -957,13 +909,34 @@ namespace FF5e_Map_Editor
 
             Cursor.Current = Cursors.WaitCursor;
 
+            int chosenTileX, chosenTileY, chosenTileXEnd, chosenTileYEnd;
+            List<List<Byte>> chosenTileId00;
+            List<List<Byte>> chosenTileId01;
+
+            tilesetForm.getClipboardInformation(
+                out chosenTileX,
+                out chosenTileY,
+                out chosenTileXEnd,
+                out chosenTileYEnd,
+                out chosenTileId00,
+                out chosenTileId01);
+
+            List<List<Byte>> bg00TopasteIn = (checkBoxBg00.Checked) ?
+                new List<List<Byte>>(chosenTileId00) :
+                new List<List<Byte>>();
+            List<List<Byte>> bg01TopasteIn = (checkBoxBg01.Checked) ?
+                new List<List<Byte>>(chosenTileId01) :
+                new List<List<Byte>>();
+
+
+
             mapManager.modifyBg0xTiles(
                 x,
                 y,
-                Math.Min(x + (choosenTileXEnd - choosenTileX), 0x3F) + 1,
-                Math.Min(y + (choosenTileYEnd - choosenTileY), 0x3F) + 1,
-                choosenTileId00,
-                choosenTileId01,
+                Math.Min(x + (chosenTileXEnd - chosenTileX), 0x3F) + 1,
+                Math.Min(y + (chosenTileYEnd - chosenTileY), 0x3F) + 1,
+                bg00TopasteIn,
+                bg01TopasteIn,
                 mapBg00D, mapBg00U, mapBg01D, mapBg01U, mapBgWalls,
                 numericUpDownMap.Value < 5);
 
@@ -980,12 +953,15 @@ namespace FF5e_Map_Editor
             if (mapManager == null || !nUNDUpdatable || mapManager.tilesBg0.Count == 0)
                 return;
 
-            if (choosenTileX != choosenTileXEnd || choosenTileY != choosenTileYEnd)
+            if (tilesetForm.moreThanOneTileSelected())
                 return;
 
-            if (numericUpDownSelectedTileBg00.Value != mapManager.tilemap00[choosenTileX + choosenTileY * 64])
+            int chosenTileX, chosenTileY;
+            tilesetForm.getClipboardInformation(out chosenTileX, out chosenTileY);
+
+            if (numericUpDownSelectedTileBg00.Value != mapManager.tilemap00[chosenTileX + chosenTileY * 64])
             {
-                mapManager.modifyBg00Tile(choosenTileX, choosenTileY, (Byte)numericUpDownSelectedTileBg00.Value,
+                mapManager.modifyBg00Tile(chosenTileX, chosenTileY, (Byte)numericUpDownSelectedTileBg00.Value,
                     mapBg00D, mapBg00U, mapBgWalls, numericUpDownMap.Value < 5);
             }
 
@@ -1003,12 +979,15 @@ namespace FF5e_Map_Editor
             if (mapManager == null || !nUNDUpdatable || mapManager.tilesBg1.Count == 0 || mapManager.tilemap01.Count == 0)
                 return;
 
-            if (choosenTileX != choosenTileXEnd || choosenTileY != choosenTileYEnd)
+            if (tilesetForm.moreThanOneTileSelected())
                 return;
 
-            if (numericUpDownSelectedTileBg01.Value != mapManager.tilemap01[choosenTileX + choosenTileY * 64])
+            int chosenTileX, chosenTileY;
+            tilesetForm.getClipboardInformation(out chosenTileX, out chosenTileY);
+
+            if (numericUpDownSelectedTileBg01.Value != mapManager.tilemap01[chosenTileX + chosenTileY * 64])
             {
-                mapManager.modifyBg01Tile(choosenTileX, choosenTileY, (Byte)numericUpDownSelectedTileBg01.Value,
+                mapManager.modifyBg01Tile(chosenTileX, chosenTileY, (Byte)numericUpDownSelectedTileBg01.Value,
                     mapBg01D, mapBg01U, mapBgWalls);
             }
 
@@ -1021,8 +1000,8 @@ namespace FF5e_Map_Editor
         private void displayNPCInfo(bool isWorldMap)
         {
             int quadrant = Convert.ToInt16(numericUpDownQuadrant.Value);
-            int x = choosenTileX;
-            int y = choosenTileY;
+            int x, y;
+            tilesetForm.getClipboardInformation(out x, out y);
 
             if (isWorldMap)
             {
@@ -1086,13 +1065,13 @@ namespace FF5e_Map_Editor
                     return;
             }
 
+            if (numericUpDownMap.Value < 5) return;
+
             System.IO.FileStream fsInput = new System.IO.FileStream(fileUnderEdition, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite);
             System.IO.FileStream fsOutput = new System.IO.FileStream(fileUnderEdition, System.IO.FileMode.Open, System.IO.FileAccess.Write, System.IO.FileShare.ReadWrite);
-            //System.IO.BinaryWriter bw = new System.IO.BinaryWriter(fs, new UnicodeEncoding());
 
             mapManager.saveBg(fsInput, fsOutput, headerOffset, currentMap, 0x01);
 
-            //bw.Close();
             fsOutput.Close();
             fsInput.Close();
         }
@@ -1164,20 +1143,7 @@ namespace FF5e_Map_Editor
             panelBoxMap.Refresh();
         }
 
-
-
-        private void panelCurrenTile_Paint(object sender, PaintEventArgs e)
-        {
-            if (!mapIsDrawable) return;
-
-            e.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
-            
-            Bitmap tileBlock = new Bitmap(16, 16);
-            mapManager.tiles16x16[choosenTileId00[0][0]].draw(0, 0, tileBlock, false, false);
-            e.Graphics.DrawImage(tileBlock, 0, 0, 32, 32);
-        }
-
-
+        
 
         #region Tileset_Tab
         

@@ -1,11 +1,22 @@
 |------------------------------------------|
 | FF5e_Map_editor                          |
 | File: changelog.txt                      |
-| v0.86, September 2016                    |
+| v0.87, September 2016                    |
 | Author: noisecross                       |
 |------------------------------------------|
 
 
+
+------------------------------------------
+Released version 0.87
+------------------------------------------
+Fixed Hiryuu sprite.
+Tileset feature moved to a different window.
+Paste the clipboard of background tiles only in visible layers.
+  (clipboard feature moved to DisplayTilemap.cs)
+Clipboard tile can be chosen in the tileset window.
+Fixed a bug which currupts the tilemaps when more than one tilemap
+  is injected into the ROM in the same run.
 
 ------------------------------------------
 Released version 0.86
@@ -17,8 +28,8 @@ Some minor fixes in code and improvements in comments.
 ------------------------------------------
 Released version 0.85
 ------------------------------------------
-Allow multiselection of tiles
-DEPRECATED Scrolling using mouse
+Allow multiselection of tiles.
+DEPRECATED Scrolling using mouse.
 Added feature which reorder tilempaps and tilemap offsets.
   (to take advantage of the 63 remaining bytes at the end
   of the tilemaps table)

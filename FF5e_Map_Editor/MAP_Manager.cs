@@ -2,12 +2,12 @@
 * |------------------------------------------|
 * | FF5e_Map_editor                          |
 * | File: MAP_Manager.cs                     |
-* | v0.86, September 2016                    |
+* | v0.87, September 2016                    |
 * | Author: noisecross                       |
 * |------------------------------------------|
 * 
 * @author noisecross
-* @version 0.86
+* @version 0.87
 * 
 */
 
@@ -50,7 +50,7 @@ namespace FF5e_Map_Editor
         // Tilemaps at CB/0000 storing the tile map of one background layer in one location
         // CB/0000 Tile maps offsets [2bytes * 0x0148]
         // CB/0290 Tile maps [Compressed unheaded type02] [1Byte * 64 * 64] [Until 0DFDFF]
-        List<Int32>      tileMapsOffsets = new List<Int32>();
+        List<long>       tileMapsOffsets = new List<long>();
         List<List<Byte>> tileMaps        = new List<List<Byte>>();
         List<long>       tileMapSizes    = new List<long>();
         long             tileMapSumSizes = 0;
@@ -99,10 +99,10 @@ namespace FF5e_Map_Editor
         public List<String> monsterGroups = new List<String>();
 
         // World Maps data
-        List<List<Byte>> worldMap2x2Blocks = new List<List<Byte>>();
+        List<List<Byte>> worldMap2x2Blocks   = new List<List<Byte>>();
         List<List<Color>> worldMapBgPalettes = new List<List<Color>>();
-        public Bitmap worldmapTileset = new Bitmap(1, 1);
-        List<List<Byte>> worldmapTileMaps = new List<List<Byte>>();
+        public Bitmap worldmapTileset        = new Bitmap(1, 1);
+        List<List<Byte>> worldmapTileMaps    = new List<List<Byte>>();
 
         // Sprites
         List<List<List<Bitmap>>> sprites = new List<List<List<Bitmap>>>();
@@ -298,19 +298,20 @@ namespace FF5e_Map_Editor
                 0x0400, 0x0400, 0x0400, 0x0400, 0x0400, 0x0400, 0x0400, 0x0400, 0x0400, 0x0400, 0x0400, 0x0800, 0x0800, 0x0800, 0x0800, 0x0800, 
                 0x0800, 0x0800, 0x0200, 0x0200, 0x0200, 0x0200, 0x0200, 0x0200, 0x0200, 0x0200, 0x0200, 0x0200, 0x0200, 0x0200, 0x0200, 0x0200, 
 
-                0x0200, 0x0200, 0x0200, 0x0200, 0x0200, 0x0200, 0x0200, 0x0400, 0x0400, 0x0400, 0x0400 };
+                0x0200, 0x0200, 0x0200, 0x0200, 0x0200, 0x0200, 0x0200, 0x0CC0, 0x0400 };
 
             for (int i = 0; i < 0x69; i++)
             {
                 List<Byte> data4bpp = br.ReadBytes(bytesToRead[i]).ToList();
-
+                
                 List<List<Bitmap>> spritesI = new List<List<Bitmap>>();
                 for (int j = 0; j < 0x08; j++)
                 {
                     //Load the sprite id bitmap.
                     Bitmap bigBmpSet = Transformations.transform4b(data4bpp, 0, bytesToRead[i], spritePalettes[j].ToArray());
+
                     //Cut the bitmap in 16x16 pieces. Mirror the sprites if needed.
-                    List<Bitmap> bmpSet = toSpriteMap(bigBmpSet, bytesToRead[i] <= 0x0200);
+                    List<Bitmap> bmpSet = toSpriteMap(bigBmpSet, bytesToRead[i] <= 0x0200, i >= 0x67);
 
                     spritesI.Add(bmpSet);
                 }
@@ -1488,6 +1489,7 @@ namespace FF5e_Map_Editor
         }
 
 
+
         /**
         * toTileMap
         * 
@@ -1497,23 +1499,29 @@ namespace FF5e_Map_Editor
         * 
         * @return: The list of bitmaps tiles.
         */
-        private static List<Bitmap> toSpriteMap(Bitmap input, bool flip=true)
+        private static List<Bitmap> toSpriteMap(Bitmap input, bool flip=true, bool px16x16=false)
         {
             List<Bitmap> output = new List<Bitmap>();
             List<Bitmap> invertOutput = new List<Bitmap>();
 
-            int maxY = (input.Height / 8);
+            int maxY = (px16x16) ? (input.Height / 16) : (input.Height / 8);
+            int maxX = (px16x16) ? 8 : 4;
 
             for (int l = 0; l < maxY; l++)
             {
-                for (int k = 0; k < 4; k++)
+                for (int k = 0; k < maxX; k++)
                 {
                     Bitmap newBitmap    = new Bitmap(input, 16, 16);
 
                     using (var g = Graphics.FromImage(newBitmap))
                     {
-                        g.DrawImage(input, new Rectangle(0, 0, 16, 8), new Rectangle(k * 32, l * 8, 16, 8), GraphicsUnit.Pixel);
-                        g.DrawImage(input, new Rectangle(0, 8, 16, 8), new Rectangle(16 + k * 32, l * 8, 16, 8), GraphicsUnit.Pixel);
+                        if (!px16x16)
+                        {
+                            g.DrawImage(input, new Rectangle(0, 0, 16, 8), new Rectangle(k * 32, l * 8, 16, 8), GraphicsUnit.Pixel);
+                            g.DrawImage(input, new Rectangle(0, 8, 16, 8), new Rectangle(16 + k * 32, l * 8, 16, 8), GraphicsUnit.Pixel);
+                        }
+                        else
+                            g.DrawImage(input, new Rectangle(0, 0, 16, 16), new Rectangle(k * 16, l * 16, 16, 16), GraphicsUnit.Pixel);
                     }
 
                     output.Add(newBitmap);
@@ -1925,6 +1933,8 @@ namespace FF5e_Map_Editor
         */
         public void modifyBg00Tile(int x, int y, Byte newValue, Bitmap bitmapD, Bitmap bitmapU, Bitmap walls, bool isWorldMap)
         {
+            if (tilemap00.Count == 0) return;
+
             tilemap00[x + (y * 64)] = newValue;
 
             using (var graphics = Graphics.FromImage(bitmapD))
@@ -1977,6 +1987,8 @@ namespace FF5e_Map_Editor
         */
         public void modifyBg01Tile(int x, int y, Byte newValue, Bitmap bitmapD, Bitmap bitmapU, Bitmap walls)
         {
+            if (tilemap01.Count == 0) return;
+
             tilemap01[x + (y * 64)] = newValue;
 
             using (var graphics = Graphics.FromImage(bitmapD))
@@ -2121,7 +2133,7 @@ namespace FF5e_Map_Editor
         */
         public void saveBg(System.IO.Stream fsInput, System.IO.Stream fsOutput, int headerOffset, int id, int layer)
         {
-            if (layer != 0 && layer != 1) return;
+            if (layer != 0x00 && layer != 0x01) return;
 
             List<Byte> input = new List<Byte>();
             int  tilemapId = -1;
@@ -2229,13 +2241,19 @@ namespace FF5e_Map_Editor
 
             tileMapSizes[tilemapId] = candidate.Count;
 
+            tileMapsOffsets.Clear();
             bw.BaseStream.Position  = 0x0B0000 + headerOffset;
 
-            long offset = 0x000290;
+            long offset = 0x0B0290;
             for (int i = 0; i < 0x0143; i++)
             {
+                //Update the ROM offsets
                 bw.Write(BitConverter.GetBytes(offset)[0]);
                 bw.Write(BitConverter.GetBytes(offset)[1]);
+                
+                //Update the current tileMapsOffsets list
+                tileMapsOffsets.Add(offset);
+
                 offset += tileMapSizes[i];
             }
             bw.Write(BitConverter.GetBytes(offset)[0]);
@@ -2300,7 +2318,7 @@ namespace FF5e_Map_Editor
         /**
         * mapGetNPCs
         * 
-        * Aux function. Chop a picture into a collection of tiles.
+        * Get the list of NPCs of a given map and draw them in a BPM.
         *
         * @param br: The reader to load the data from.
         * @param headerOffset: The offset due to a header in the ROM.
@@ -2320,6 +2338,7 @@ namespace FF5e_Map_Editor
             output = "Id " + id.ToString("X3") + ": " +
                 begin.ToString("X4") + " to " + end.ToString("X4") + "\r\n\r\n";
 
+            // Load every NPC in map 'id'
             for (long currentPos = begin; currentPos < end; currentPos += 7)
             {
                 br.BaseStream.Position = currentPos;
@@ -2330,6 +2349,7 @@ namespace FF5e_Map_Editor
 
                 NPC newNPC = new NPC(address, npc, br, headerOffset, speechTxt);
 
+                // Add the NPC to the list
                 npcs.Add(newNPC);
                 output += newNPC.toString();
 
@@ -2341,32 +2361,30 @@ namespace FF5e_Map_Editor
                 //Byte    6 Palette (mask with 0x07)
                 //Byte    6 Extra parameters (mask with 0x07)(0x10 determines layer, 0x20, 0x40, 0x60 determines direction)
 
+                // Draw this NPC in the bitmap
                 using (var graphics = Graphics.FromImage(mapNPCs))
                 {
+                    int x = npc[3] * 16;
+                    int y = npc[4] * 16;
+                    int spriteSide = (npc[2] == 0x67) ? 32 : 16;
+
+                    // Reallocate x and y for Hiryuu sprites and force the Hiryuu pallete
+                    if (npc[2] == 0x67) { x -= 8; y -= 16; palette = 0x02; }
+                    if (npc[2] == 0x68) {       ; y -=  8; palette = 0x02; }
+
+                    // Draw red dotted shape under the NPC sprite
                     Pen redPen = new Pen(Color.Red, 1.0f);
                     redPen.DashPattern = new float[] { 4.0F, 2.0F, 1.0F, 3.0F };
-                    graphics.DrawRectangle(redPen, npc[3] * 16, npc[4] * 16, 15, 15);
+                    graphics.DrawRectangle(redPen, x, y, spriteSide - 1, spriteSide - 1);
 
                     if (npc[2] < 0xF0)
                     {
-                        //Bitmap spriteSet = Transformations.transform4b(br.ReadBytes(bytesToRead[i]).ToList(), 0, bytesToRead[i], spritePalettes[0].ToArray());
-                        //sprites.Add(toSpriteMap(spriteSet, bytesToRead[i] <= 0x0200));
-                        //Bitmap bmp = sprites[npc[2]][((npc[6] & 0xE0) >> 0x05)];
-
-                        //Map 0x1AB is nice to check this thing
-
-                        //Transform bytes into a graphic with the right palette
-                        //Bitmap bigBmpSet = Transformations.transform4b(sprites[npc[2]], 0, sprites[npc[2]].Count, spritePalettes[palette].ToArray());
-                        //Cut the bitmap in 16x16 pieces. Mirror the sprites if needed.
-                        //List<Bitmap> bmpSet = toSpriteMap(bigBmpSet, sprites[npc[2]].Count <= 0x0200);
                         //Take the 16x16 piece to display.
-                        //Bitmap bmp = bmpSet[((npc[6] & 0xE0) >> 0x05)];
-
-                        //Take the 16x16 piece to display.
-                        Bitmap bmp = new Bitmap(sprites[npc[2]][palette][((npc[6] & 0xE0) >> 0x05)]);
+                        //Bitmap bmp = new Bitmap(sprites[npc[2]][palette][((npc[6] & 0xE0) >> 0x05)]);
+                        Bitmap bmp = getNPCSprite(npc[2], npc[6]);
 
                         //Set transparency
-                        Rectangle dstRect = new Rectangle(npc[3] * 16, npc[4] * 16, bmp.Width, bmp.Height);
+                        Rectangle dstRect = new Rectangle(x, y, bmp.Width, bmp.Height);
                         ImageAttributes attr = new ImageAttributes();
                         attr.SetColorKey(spritePalettes[palette][0], spritePalettes[palette][0]);
 
@@ -2382,7 +2400,7 @@ namespace FF5e_Map_Editor
 
             // Load map charset
             // HACKME What is 00:0ADA?
-            // position =  C0/1E02[00:0ADA * 2]
+            // position = C0/1E02[00:0ADA * 2]
             br.BaseStream.Position = 0x001E02 + headerOffset + 4;
             int offset = br.ReadByte() + br.ReadByte() * 0x0100;
             br.BaseStream.Position = 0x1A0000 + headerOffset + offset;
@@ -2447,11 +2465,35 @@ namespace FF5e_Map_Editor
         {
             Bitmap output = new Bitmap(1, 1);
 
-            if (graphicID < 0xF0)
+            int palette = (Byte)((properties & 0x07) >> 0x00);
+            int direction = (Byte)((properties & 0xE0) >> 0x05);
+
+            if (graphicID < 0x67)
             {
-                int palette   = (Byte)((properties & 0x03) >> 0x00);
-                int direction = (Byte)((properties & 0xE0) >> 0x05);
+                // Normal NPC Sprite
                 output = new Bitmap(sprites[graphicID][palette][direction]);
+            }
+            else if (graphicID == 0x67)
+            {
+                // Hiryuu body
+                output = new Bitmap(32, 32);
+                using (var g = Graphics.FromImage(output))
+                {
+                    g.DrawImage(sprites[graphicID][0x02][0x00], new Rectangle(0, 0, 16, 16), new Rectangle(0, 0, 16, 16), GraphicsUnit.Pixel);
+                    g.DrawImage(sprites[graphicID][0x02][0x01], new Rectangle(0, 16, 16, 16), new Rectangle(0, 0, 16, 16), GraphicsUnit.Pixel);
+
+                    Bitmap newInvBitmap00 = new Bitmap(sprites[graphicID][0x02][0x00], 16, 16);
+                    Bitmap newInvBitmap01 = new Bitmap(sprites[graphicID][0x02][0x01], 16, 16);
+                    newInvBitmap00.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                    newInvBitmap01.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                    g.DrawImage(newInvBitmap00, new Rectangle(16, 0, 16, 16), new Rectangle(0, 0, 16, 16), GraphicsUnit.Pixel);
+                    g.DrawImage(newInvBitmap01, new Rectangle(16, 16, 16, 16), new Rectangle(0, 0, 16, 16), GraphicsUnit.Pixel);
+                }
+            }
+            else if (graphicID == 0x68)
+            {
+                // Hiryuu head
+                output = new Bitmap(sprites[graphicID][0x02][0x01]);
             }
 
             return output;

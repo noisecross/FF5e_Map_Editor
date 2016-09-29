@@ -174,9 +174,14 @@
             this.comboBoxEvents = new System.Windows.Forms.ComboBox();
             this.textBoxMapProperties = new System.Windows.Forms.TextBox();
             this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.labelEnemyGroups = new System.Windows.Forms.Label();
+            this.numericUpDownEnemyGroups = new System.Windows.Forms.NumericUpDown();
+            this.groupBoxenemyFormations = new System.Windows.Forms.GroupBox();
+            this.labelEnemyFormation = new System.Windows.Forms.Label();
+            this.numericUpDownEnemyFormations = new System.Windows.Forms.NumericUpDown();
             this.labelMapEncounters = new System.Windows.Forms.Label();
             this.textBoxMapEncounters = new System.Windows.Forms.TextBox();
-            this.numericUpDownEnemyFormations = new System.Windows.Forms.NumericUpDown();
             this.menuStripMain = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openSMCToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -184,11 +189,6 @@
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.groupBoxenemyFormations = new System.Windows.Forms.GroupBox();
-            this.labelEnemyFormation = new System.Windows.Forms.Label();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.labelEnemyGroups = new System.Windows.Forms.Label();
-            this.numericUpDownEnemyGroups = new System.Windows.Forms.NumericUpDown();
             this.tabControl1.SuspendLayout();
             this.tabPage0.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownQuadrant)).BeginInit();
@@ -252,11 +252,11 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownEventY)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownEventX)).BeginInit();
             this.tabPage4.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownEnemyFormations)).BeginInit();
-            this.menuStripMain.SuspendLayout();
-            this.groupBoxenemyFormations.SuspendLayout();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownEnemyGroups)).BeginInit();
+            this.groupBoxenemyFormations.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownEnemyFormations)).BeginInit();
+            this.menuStripMain.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -340,7 +340,6 @@
             this.panelCurrenTile.Name = "panelCurrenTile";
             this.panelCurrenTile.Size = new System.Drawing.Size(31, 31);
             this.panelCurrenTile.TabIndex = 65;
-            this.panelCurrenTile.Paint += new System.Windows.Forms.PaintEventHandler(this.panelCurrenTile_Paint);
             // 
             // labelSub
             // 
@@ -1675,7 +1674,7 @@
             this.numericUpDownNPCsGraphicId.Hexadecimal = true;
             this.numericUpDownNPCsGraphicId.Location = new System.Drawing.Point(6, 102);
             this.numericUpDownNPCsGraphicId.Maximum = new decimal(new int[] {
-            255,
+            104,
             0,
             0,
             0});
@@ -1936,6 +1935,79 @@
             this.tabPage4.Text = "Encounters";
             this.tabPage4.UseVisualStyleBackColor = true;
             // 
+            // groupBox2
+            // 
+            this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox2.Controls.Add(this.labelEnemyGroups);
+            this.groupBox2.Controls.Add(this.numericUpDownEnemyGroups);
+            this.groupBox2.Location = new System.Drawing.Point(3, 418);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(720, 117);
+            this.groupBox2.TabIndex = 53;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Enemy groups viewer";
+            // 
+            // labelEnemyGroups
+            // 
+            this.labelEnemyGroups.AutoSize = true;
+            this.labelEnemyGroups.Location = new System.Drawing.Point(6, 42);
+            this.labelEnemyGroups.Name = "labelEnemyGroups";
+            this.labelEnemyGroups.Size = new System.Drawing.Size(19, 13);
+            this.labelEnemyGroups.TabIndex = 46;
+            this.labelEnemyGroups.Text = "<>";
+            // 
+            // numericUpDownEnemyGroups
+            // 
+            this.numericUpDownEnemyGroups.Hexadecimal = true;
+            this.numericUpDownEnemyGroups.Location = new System.Drawing.Point(6, 19);
+            this.numericUpDownEnemyGroups.Maximum = new decimal(new int[] {
+            255,
+            0,
+            0,
+            0});
+            this.numericUpDownEnemyGroups.Name = "numericUpDownEnemyGroups";
+            this.numericUpDownEnemyGroups.Size = new System.Drawing.Size(59, 20);
+            this.numericUpDownEnemyGroups.TabIndex = 45;
+            this.numericUpDownEnemyGroups.ValueChanged += new System.EventHandler(this.numericUpDownEnemyGroups_ValueChanged);
+            // 
+            // groupBoxenemyFormations
+            // 
+            this.groupBoxenemyFormations.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBoxenemyFormations.Controls.Add(this.labelEnemyFormation);
+            this.groupBoxenemyFormations.Controls.Add(this.numericUpDownEnemyFormations);
+            this.groupBoxenemyFormations.Location = new System.Drawing.Point(458, 3);
+            this.groupBoxenemyFormations.Name = "groupBoxenemyFormations";
+            this.groupBoxenemyFormations.Size = new System.Drawing.Size(265, 409);
+            this.groupBoxenemyFormations.TabIndex = 52;
+            this.groupBoxenemyFormations.TabStop = false;
+            this.groupBoxenemyFormations.Text = "Enemy formations viewer";
+            // 
+            // labelEnemyFormation
+            // 
+            this.labelEnemyFormation.AutoSize = true;
+            this.labelEnemyFormation.Location = new System.Drawing.Point(6, 42);
+            this.labelEnemyFormation.Name = "labelEnemyFormation";
+            this.labelEnemyFormation.Size = new System.Drawing.Size(19, 13);
+            this.labelEnemyFormation.TabIndex = 46;
+            this.labelEnemyFormation.Text = "<>";
+            // 
+            // numericUpDownEnemyFormations
+            // 
+            this.numericUpDownEnemyFormations.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.numericUpDownEnemyFormations.Hexadecimal = true;
+            this.numericUpDownEnemyFormations.Location = new System.Drawing.Point(6, 19);
+            this.numericUpDownEnemyFormations.Maximum = new decimal(new int[] {
+            511,
+            0,
+            0,
+            0});
+            this.numericUpDownEnemyFormations.Name = "numericUpDownEnemyFormations";
+            this.numericUpDownEnemyFormations.Size = new System.Drawing.Size(59, 20);
+            this.numericUpDownEnemyFormations.TabIndex = 45;
+            this.numericUpDownEnemyFormations.ValueChanged += new System.EventHandler(this.numericUpDownEnemyFormations_ValueChanged);
+            // 
             // labelMapEncounters
             // 
             this.labelMapEncounters.AutoSize = true;
@@ -1957,21 +2029,6 @@
             this.textBoxMapEncounters.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.textBoxMapEncounters.Size = new System.Drawing.Size(449, 393);
             this.textBoxMapEncounters.TabIndex = 50;
-            // 
-            // numericUpDownEnemyFormations
-            // 
-            this.numericUpDownEnemyFormations.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.numericUpDownEnemyFormations.Hexadecimal = true;
-            this.numericUpDownEnemyFormations.Location = new System.Drawing.Point(6, 19);
-            this.numericUpDownEnemyFormations.Maximum = new decimal(new int[] {
-            511,
-            0,
-            0,
-            0});
-            this.numericUpDownEnemyFormations.Name = "numericUpDownEnemyFormations";
-            this.numericUpDownEnemyFormations.Size = new System.Drawing.Size(59, 20);
-            this.numericUpDownEnemyFormations.TabIndex = 45;
-            this.numericUpDownEnemyFormations.ValueChanged += new System.EventHandler(this.numericUpDownEnemyFormations_ValueChanged);
             // 
             // menuStripMain
             // 
@@ -2027,64 +2084,6 @@
             this.aboutToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
             this.aboutToolStripMenuItem.Text = "About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
-            // 
-            // groupBoxenemyFormations
-            // 
-            this.groupBoxenemyFormations.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBoxenemyFormations.Controls.Add(this.labelEnemyFormation);
-            this.groupBoxenemyFormations.Controls.Add(this.numericUpDownEnemyFormations);
-            this.groupBoxenemyFormations.Location = new System.Drawing.Point(458, 3);
-            this.groupBoxenemyFormations.Name = "groupBoxenemyFormations";
-            this.groupBoxenemyFormations.Size = new System.Drawing.Size(265, 409);
-            this.groupBoxenemyFormations.TabIndex = 52;
-            this.groupBoxenemyFormations.TabStop = false;
-            this.groupBoxenemyFormations.Text = "Enemy formations viewer";
-            // 
-            // labelEnemyFormation
-            // 
-            this.labelEnemyFormation.AutoSize = true;
-            this.labelEnemyFormation.Location = new System.Drawing.Point(6, 42);
-            this.labelEnemyFormation.Name = "labelEnemyFormation";
-            this.labelEnemyFormation.Size = new System.Drawing.Size(19, 13);
-            this.labelEnemyFormation.TabIndex = 46;
-            this.labelEnemyFormation.Text = "<>";
-            // 
-            // groupBox2
-            // 
-            this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox2.Controls.Add(this.labelEnemyGroups);
-            this.groupBox2.Controls.Add(this.numericUpDownEnemyGroups);
-            this.groupBox2.Location = new System.Drawing.Point(3, 418);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(720, 117);
-            this.groupBox2.TabIndex = 53;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Enemy groups viewer";
-            // 
-            // labelEnemyGroups
-            // 
-            this.labelEnemyGroups.AutoSize = true;
-            this.labelEnemyGroups.Location = new System.Drawing.Point(6, 42);
-            this.labelEnemyGroups.Name = "labelEnemyGroups";
-            this.labelEnemyGroups.Size = new System.Drawing.Size(19, 13);
-            this.labelEnemyGroups.TabIndex = 46;
-            this.labelEnemyGroups.Text = "<>";
-            // 
-            // numericUpDownEnemyGroups
-            // 
-            this.numericUpDownEnemyGroups.Hexadecimal = true;
-            this.numericUpDownEnemyGroups.Location = new System.Drawing.Point(6, 19);
-            this.numericUpDownEnemyGroups.Maximum = new decimal(new int[] {
-            255,
-            0,
-            0,
-            0});
-            this.numericUpDownEnemyGroups.Name = "numericUpDownEnemyGroups";
-            this.numericUpDownEnemyGroups.Size = new System.Drawing.Size(59, 20);
-            this.numericUpDownEnemyGroups.TabIndex = 45;
-            this.numericUpDownEnemyGroups.ValueChanged += new System.EventHandler(this.numericUpDownEnemyGroups_ValueChanged);
             // 
             // Main_Map_Editor
             // 
@@ -2171,14 +2170,14 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownEventX)).EndInit();
             this.tabPage4.ResumeLayout(false);
             this.tabPage4.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownEnemyFormations)).EndInit();
-            this.menuStripMain.ResumeLayout(false);
-            this.menuStripMain.PerformLayout();
-            this.groupBoxenemyFormations.ResumeLayout(false);
-            this.groupBoxenemyFormations.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownEnemyGroups)).EndInit();
+            this.groupBoxenemyFormations.ResumeLayout(false);
+            this.groupBoxenemyFormations.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownEnemyFormations)).EndInit();
+            this.menuStripMain.ResumeLayout(false);
+            this.menuStripMain.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
